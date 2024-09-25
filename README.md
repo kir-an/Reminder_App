@@ -1,6 +1,7 @@
-# Reminder App README
+# Reminder App
 
 ## Overview
+The lib/main.dart has the actual basic Implementation
 
 The Reminder App is a Flutter application designed to help users set daily reminders for their activities. It allows users to choose a day, set a time, and select an activity. Upon reaching the scheduled time, the app plays a sound to alert the user.
 
