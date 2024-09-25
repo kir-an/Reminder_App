@@ -1,0 +1,149 @@
+import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:intl/intl.dart';
+import 'package:timezone/data/latest.dart' as tz;
+
+void main() {
+  tz.initializeTimeZones();
+  runApp(ReminderApp());
+}
+
+class ReminderApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Reminder App',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: ReminderHomePage(),
+    );
+  }
+}
+
+class ReminderHomePage extends StatefulWidget {
+  @override
+  _ReminderHomePageState createState() => _ReminderHomePageState();
+}
+
+class _ReminderHomePageState extends State<ReminderHomePage> {
+  final List<String> daysOfWeek = [
+    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+  ];
+  
+  final List<String> activities = [
+    'Wake up', 'Go to gym', 'Breakfast', 'Meetings', 'Lunch', 
+    'Quick nap', 'Go to library', 'Dinner', 'Go to sleep'
+  ];
+
+  String? selectedDay;
+  TimeOfDay selectedTime = TimeOfDay.now();
+  String? selectedActivity;
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
+  Future<void> _playSound() async {
+    await _audioPlayer.play('android.resource://com.example.yourappname/raw/notification_sound');
+  }
+
+  void _scheduleReminder() {
+    if (selectedDay != null && selectedActivity != null) {
+      final scheduledTime = DateTime(
+        DateTime.now().year,
+        DateTime.now().month,
+        DateTime.now().day,
+        selectedTime.hour,
+        selectedTime.minute,
+      );
+
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Reminder Set'),
+          content: Text('Reminder set for ${selectedActivity} on ${selectedDay} at ${DateFormat.jm().format(scheduledTime)}.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
+
+      Future.delayed(scheduledTime.difference(DateTime.now()), () {
+        _playSound();
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Daily Reminder')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            DropdownButton<String>(
+              hint: Text('Select Day'),
+              value: selectedDay,
+              onChanged: (String? newValue) {
+                setState(() {
+                  selectedDay = newValue;
+                });
+              },
+              items: daysOfWeek.map((day) {
+                return DropdownMenuItem<String>(
+                  value: day,
+                  child: Text(day),
+                );
+              }).toList(),
+            ),
+            SizedBox(height: 16),
+            GestureDetector(
+              onTap: () async {
+                TimeOfDay? picked = await showTimePicker(
+                  context: context,
+                  initialTime: selectedTime,
+                );
+                if (picked != null) {
+                  setState(() {
+                    selectedTime = picked;
+                  });
+                }
+              },
+              child: AbsorbPointer(
+                child: TextField(
+                  decoration: InputDecoration(
+                    labelText: 'Select Time',
+                    hintText: '${selectedTime.format(context)}',
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
+            DropdownButton<String>(
+              hint: Text('Select Activity'),
+              value: selectedActivity,
+              onChanged: (String? newValue) {
+                setState(() {
+                  selectedActivity = newValue;
+                });
+              },
+              items: activities.map((activity) {
+                return DropdownMenuItem<String>(
+                  value: activity,
+                  child: Text(activity),
+                );
+              }).toList(),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _scheduleReminder,
+              child: Text('Set Reminder'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

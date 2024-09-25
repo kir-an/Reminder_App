@@ -25,11 +25,11 @@ The Reminder App is a Flutter application designed to help users set daily remin
 To run the Reminder App, ensure you have Flutter installed. Follow these steps:
 
 1. Clone the repository:
-   git clone <https://github.com/kir-an/Reminder_App.git>
-   cd reminder_app
+    git clone <https://github.com/kir-an/Reminder_App.git>
+    cd reminder_app
 
-2.Install dependencies:
+2. Install dependencies:
     flutter pub get
-    
-3.Run the app:
+
+3. Run the app:
     flutter run
